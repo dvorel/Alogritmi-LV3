@@ -1,19 +1,24 @@
 #include <stdio.h>
 #include <time.h>
 
-#define N 30
+#define N 26
 
 #define MAXS 2000
 long stog1[MAXS];
 long stog2[MAXS];
-int sp1 = 0, sp2 = 0;
+int sp1 = 0, sp2 = 0, n = 1;
 int t1 = 0, t2 = 0;
 long izracun = 0;
 
+
 struct Stog {
     long data;
-    struct Stog* next;
+    struct Stog* prev;
 };
+
+struct Stog* trN;
+struct Stog* trM;
+
 
 void pushn(long broj) {
     stog1[sp1] = broj;
@@ -76,35 +81,63 @@ long povrhs(long n, long m) {
     }
     return povrh;
 }
-void pushP(long data, ) {
 
+struct Stog* push (long data, struct  Stog* trenutni) {
+    struct Stog* element = NULL;
+    element = (struct Stog*)malloc(sizeof(struct Stog));
+    
+    element->prev = trenutni;
+    element->data = data;
 
+    return element;
+}
+
+long popNL() {
+    long data = trN->data;
+    struct Stog* clr = trN;
+    if (trN != NULL) {
+        trN = trN->prev;
+    }
+    free(clr);
+    n--;
+    return data;
+}
+
+long popML() {
+    long data = trM->data;
+    struct Stog* clr = trM;
+    trM = trM->prev;
+    free(clr);
+    return data;
 }
 
 long povrhPovezana(long n, long m) {
+    /*popunjavanje prvog*/
+    trN = (struct Stog*)malloc(sizeof(struct Stog));
+    trN->prev = NULL;
+    trN->data = n;
     
-    struct Stog* prviN = NULL;
-    prviN = (struct Stog*)malloc(sizeof(struct Stog));
-    struct Stog* prviM = NULL;
-    prviM = (struct Stog*)malloc(sizeof(struct Stog));
-
-    pushn(n);
-    pushm(m);
+    trM = (struct Stog*)malloc(sizeof(struct Stog));
+    trM->prev = NULL;
+    trM->data = m;
 
     long povrh = 0;
 
-    while (sp1 != 0) {
-        n = popn();
-        m = popm();
+    while (n != 0) {
+        n = popNL();
+        m = popML();
 
         if (n == m || m == 0) {
             povrh++;
         }
         else {
-            pushn(n - 1);
-            pushm(m - 1);
-            pushn(n - 1);
-            pushm(m);
+            
+            trN = push(n - 1, trN); 
+            n++;
+            trM = push(m - 1, trM);
+            trN = push(n - 1, trN);
+            n++;
+            trM = push(m, trN);
         }
     }
     return povrh;
