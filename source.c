@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 
-#define N 26
+#define N 18
+
 
 #define MAXS 2000
 long stog1[MAXS];
 long stog2[MAXS];
-int sp1 = 0, sp2 = 0, n = 1;
+int sp1 = 0, sp2 = 0, nL = 1;
 int t1 = 0, t2 = 0;
 long izracun = 0;
 
@@ -83,47 +85,44 @@ long povrhs(long n, long m) {
 }
 
 struct Stog* push (long data, struct  Stog* trenutni) {
-    struct Stog* element = NULL;
+    trenutni->data = data;    
+    struct Stog* element;
     element = (struct Stog*)malloc(sizeof(struct Stog));
     
     element->prev = trenutni;
-    element->data = data;
 
     return element;
 }
 
 long popNL() {
-    long data = trN->data;
-    struct Stog* clr = trN;
-    if (trN != NULL) {
-        trN = trN->prev;
+    struct Stog* c = trN;
+    trN = trN->prev;
+    if (trN->prev != NULL) {
+        free(c);
     }
-    free(clr);
-    n--;
-    return data;
+    nL--;
+    return trN->data;
 }
 
 long popML() {
-    long data = trM->data;
-    struct Stog* clr = trM;
+    struct Stog* c = trM;
     trM = trM->prev;
-    free(clr);
-    return data;
+    if (trM->prev != NULL) {
+        free(c);
+    }
+    return trM->data;
 }
 
 long povrhPovezana(long n, long m) {
     /*popunjavanje prvog*/
-    trN = (struct Stog*)malloc(sizeof(struct Stog));
-    trN->prev = NULL;
-    trN->data = n;
+
     
-    trM = (struct Stog*)malloc(sizeof(struct Stog));
-    trM->prev = NULL;
-    trM->data = m;
+    trN = push(n, trN);
+    trM = push(m, trM);
 
     long povrh = 0;
 
-    while (n != 0) {
+    while (nL != 0) {
         n = popNL();
         m = popML();
 
@@ -133,11 +132,11 @@ long povrhPovezana(long n, long m) {
         else {
             
             trN = push(n - 1, trN); 
-            n++;
+            nL++;
             trM = push(m - 1, trM);
             trN = push(n - 1, trN);
-            n++;
-            trM = push(m, trN);
+            nL++;
+            trM = push(m, trM);
         }
     }
     return povrh;
@@ -148,6 +147,11 @@ long povrhPovezana(long n, long m) {
 int main() {
     long n = N;
     long m = N / 2;
+    trN = (struct Stog*)malloc(sizeof(struct Stog));
+    trN->prev = NULL;
+    trM = (struct Stog*)malloc(sizeof(struct Stog));
+    trM->prev = NULL;
+
     /*Rekurzivno*/
     t1 = clock();
     izracun = povrh(n, m);
@@ -167,7 +171,7 @@ int main() {
 
 
     t1 = clock();
-    izracun = povrh(n, m);
+    izracun = povrhPovezana(n, m);
     t2 = clock();
     printf("PovrhP %d | %d = %d\n", n, m, izracun);
     printf("Povezana = %dms\n", t2 - t1);
